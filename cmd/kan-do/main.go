@@ -4,6 +4,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -11,8 +12,12 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/azmainadel/kan-do/internal/export"
+	"github.com/azmainadel/kan-do/internal/gitsync"
 	"github.com/azmainadel/kan-do/internal/home"
 	"github.com/azmainadel/kan-do/internal/mcp"
+	"github.com/azmainadel/kan-do/internal/service"
+	"github.com/azmainadel/kan-do/internal/update"
 	"github.com/azmainadel/kan-do/internal/version"
 	"github.com/azmainadel/kan-do/internal/web"
 )
@@ -91,5 +96,116 @@ func root() *cobra.Command {
 			return nil
 		},
 	})
+	var (
+		repo       string
+		keepLocal  bool
+		keepRemote bool
+	)
+	syncCmd := &cobra.Command{
+		Use:   "sync",
+		Short: "Commit the data folder and pull or push it with its git remote",
+		Args:  cobra.NoArgs,
+		RunE: func(*cobra.Command, []string) error {
+			h, err := open()
+			if err != nil {
+				return err
+			}
+			if repo != "" {
+				url, err := gitsync.SetRemote(h, repo, true)
+				if err != nil {
+					return err
+				}
+				fmt.Printf("The board syncs with %s.\n", url)
+			}
+			keep := gitsync.KeepNone
+			if keepLocal {
+				keep = gitsync.KeepLocal
+			} else if keepRemote {
+				keep = gitsync.KeepRemote
+			}
+			msg, err := gitsync.Sync(h, keep, true)
+			if err != nil {
+				return err
+			}
+			fmt.Println(msg)
+			return nil
+		},
+	}
+	syncCmd.Flags().StringVar(&repo, "repo", "", "sync with this git repo from now on, like https://github.com/you/kan-do-data or you/kan-do-data")
+	syncCmd.Flags().BoolVar(&keepLocal, "keep-local", false, "when both sides changed, keep this machine's board and overwrite the remote")
+	syncCmd.Flags().BoolVar(&keepRemote, "keep-remote", false, "when both sides changed, take the remote board and drop this machine's changes")
+	syncCmd.MarkFlagsMutuallyExclusive("keep-local", "keep-remote")
+	cmd.AddCommand(syncCmd)
+
+	var format, project, output string
+	exportCmd := &cobra.Command{
+		Use:   "export",
+		Short: "Write the whole board as Markdown or JSON",
+		Args:  cobra.NoArgs,
+		RunE: func(*cobra.Command, []string) error {
+			h, err := open()
+			if err != nil {
+				return err
+			}
+			return export.Run(h, format, project, output)
+		},
+	}
+	exportCmd.Flags().StringVarP(&format, "format", "f", "markdown", "output format: markdown or json")
+	exportCmd.Flags().StringVarP(&project, "project", "p", "", "only this project")
+	exportCmd.Flags().StringVarP(&output, "output", "o", "", "write to this file instead of the terminal")
+	cmd.AddCommand(exportCmd)
+
+	cmd.AddCommand(&cobra.Command{
+		Use:   "update",
+		Short: "Install the latest release over this kan-do, and restart the board's service",
+		Args:  cobra.NoArgs,
+		RunE: func(*cobra.Command, []string) error {
+			latest := update.Latest(true)
+			if latest == "" {
+				return errors.New("can't reach GitHub to check for updates")
+			}
+			if !update.Newer(latest) {
+				fmt.Printf("kan-do is up to date (%s).\n", version.Version)
+				return nil
+			}
+			fmt.Printf("Installing kan-do %s (you have %s)…\n", latest, version.Version)
+			if _, err := update.Install(); err != nil {
+				return err
+			}
+			restarted, err := service.Restart()
+			if err != nil {
+				return err
+			}
+			if restarted {
+				fmt.Printf("Updated to %s, and restarted the board.\n", latest)
+			} else {
+				fmt.Printf("Updated to %s.\n", latest)
+			}
+			return nil
+		},
+	})
+
+	serviceCmd := &cobra.Command{
+		Use:   "service",
+		Short: "Start the board automatically at login (macOS and Linux)",
+	}
+	serviceCmd.AddCommand(&cobra.Command{
+		Use:   "install",
+		Short: "Install and start a service that runs the board at login (LaunchAgent on macOS, systemd on Linux)",
+		Args:  cobra.NoArgs,
+		RunE: func(*cobra.Command, []string) error {
+			h, err := open()
+			if err != nil {
+				return err
+			}
+			return service.Install(h)
+		},
+	}, &cobra.Command{
+		Use:   "uninstall",
+		Short: "Stop and remove that service",
+		Args:  cobra.NoArgs,
+		RunE:  func(*cobra.Command, []string) error { return service.Uninstall() },
+	})
+	cmd.AddCommand(serviceCmd)
 	return cmd
 }
