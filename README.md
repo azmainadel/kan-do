@@ -2,7 +2,38 @@
   <img alt="kan-do: a tiny board for you and your agents" src="docs/img/banner.webp" width="840">
 </p>
 
-kan-do is a kanban board for you and your coding agents. You use the board in your browser. Your agents use the same board through MCP. It's one small program, and the whole board lives in one folder on your machine. You don't need an account or a server.
+kan-do is a kanban board for you and your coding agents. You plan work on the board in your browser. Your agents read the same board through MCP, pick up tasks, move cards and leave comments as they work. You watch it happen live.
+
+It's one small program. The whole board is one folder on your machine, and a private git repo can keep it in step on every computer you use. There's no account, no cloud service and nothing to host.
+
+## What you get
+
+### A board that's quick to use
+
+- Projects in a sidebar, each with its own color and open-task count, plus an "All projects" view.
+- Columns you choose: `todo`, `doing`, `review` and `done` by default. The done column folds away when you don't need it.
+- Drag and drop with mouse, touch or keyboard.
+- Cards with a title, a Markdown description, tags and comments. Paste or drop images straight into a task or a comment.
+- Search across every project with `/` or ⌘K.
+- Filters by text, tag, project, and agent or human tasks. Filters stay in the address, so you can bookmark a view.
+- Keyboard control for almost everything (see [shortcuts](#keyboard-shortcuts)).
+- Light and dark themes that follow your system, and a layout that works on a phone.
+
+### A shared to-do list for your agents
+
+- Agents connect over MCP, the standard way coding agents use tools. Claude Code, Cursor, Codex and any other MCP client work.
+- Link a project to one or more git repos. An agent working in that repo uses that project on its own, so you don't have to tell it where to look.
+- Agents can list tasks, create them, take the next one, update them and comment on them. A typical loop: the agent takes the top task, moves it to `doing`, works on it, leaves a comment saying what it did, and moves it to `review` for you.
+- Mark a task as human, and agents leave it alone.
+- Every change an agent makes shows up on the board right away. You don't need to reload.
+
+### Your data, on your machines
+
+- Everything is in `~/kando`: one SQLite file, your images and a settings file.
+- Sync between computers through any private git repo, like GitHub. If two machines changed the board, kan-do asks which one to keep and saves a backup of the other.
+- Export the whole board as Markdown or JSON whenever you want.
+- Runs on macOS and Linux, including a Raspberry Pi.
+- `kando update` installs new releases for you.
 
 ## Install
 
@@ -40,7 +71,23 @@ claude mcp add kando --scope user -- kando mcp
 
 Other agents work the same way: run `kando mcp` as a stdio MCP server. If your agent can only reach MCP over HTTP, use `http://localhost:4242/mcp`.
 
-When an agent runs inside a git repo, kan-do picks the project linked to that repo. Agents can list, create and update tasks, take the next one, and leave comments. Changes show up on the board right away.
+When an agent runs inside a git repo, kan-do picks the project linked to that repo. Link a repo from the project menu on the board, or ask your agent to do it. Then try telling your agent:
+
+> Take the next task from kan-do and work on it.
+
+## Keyboard shortcuts
+
+| Key | What it does |
+| --- | --- |
+| `/` or ⌘K | Search |
+| `n` | New task |
+| `f` | Filter the board |
+| Arrow keys or `h` `j` `k` `l` | Move between cards |
+| `Enter` | Open the card |
+| `Shift` + arrow keys | Move the card to another column, or up and down |
+| `c` | Copy the card's key, like `api#12` |
+| `Esc` | Close or clear |
+| `?` | Show all shortcuts |
 
 ## Sync between machines
 
