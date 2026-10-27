@@ -4,7 +4,7 @@ Notes for whoever picks up kan-do next. Read `docs/SPEC.md` first: it's the full
 
 ## Where things stand
 
-All work is on the branch `feat/go-rewrite`. Nothing is merged to `main` yet, and no release has been made.
+All work is on the branch `develop`. Nothing is merged to `main` yet, and no release has been made.
 
 | Phase | What | State |
 | --- | --- | --- |
