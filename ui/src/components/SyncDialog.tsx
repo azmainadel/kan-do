@@ -42,7 +42,7 @@ export function SyncDialog({ open, remote, onOpenChange, onSaved }: Props) {
     >
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/45" />
-        <Dialog.Content className="fixed top-[12vh] left-1/2 z-50 w-[min(520px,calc(100vw-32px))] -translate-x-1/2 rounded-[18px] border border-line bg-menu p-[22px] pb-[18px] shadow-pop">
+        <Dialog.Content className="fixed top-[12vh] left-1/2 z-50 w-[min(520px,calc(100vw-32px))] -translate-x-1/2 rounded-[18px] border border-line bg-menu p-[22px] pb-[18px] shadow-pop focus-visible:outline-none">
           <form
             className="flex flex-col gap-3"
             onSubmit={(e) => {

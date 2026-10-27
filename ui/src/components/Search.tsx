@@ -57,7 +57,7 @@ export function Search({ open, onOpenChange, projects, onPick }: Props) {
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/45" />
         <Dialog.Content
           aria-describedby={undefined}
-          className="fixed top-[12vh] left-1/2 z-50 flex max-h-[70vh] w-[min(640px,calc(100vw-32px))] -translate-x-1/2 flex-col overflow-hidden rounded-[18px] border border-line bg-menu shadow-pop"
+          className="fixed top-[12vh] left-1/2 z-50 flex max-h-[70vh] w-[min(640px,calc(100vw-32px))] -translate-x-1/2 flex-col overflow-hidden rounded-[18px] border border-line bg-menu shadow-pop focus-visible:outline-none"
         >
           <Dialog.Title className="sr-only">Search tasks</Dialog.Title>
           {/* Results come ordered from the server, so cmdk only handles the keyboard. */}
