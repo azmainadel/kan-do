@@ -84,6 +84,55 @@ test("shows an agent's change without a reload", async () => {
   await expect(column("todo").locator("[data-id]", { hasText: "Added by an agent" })).toBeVisible();
 });
 
+test("filters the cards, and keeps the filter in the address", async () => {
+  await page.keyboard.press("f");
+  await expect(page.getByLabel("Filter cards")).toBeFocused();
+  await page.keyboard.type("install");
+  await expect(card("Added by an agent")).toHaveCount(0);
+  await expect(card("Write the install guide")).toBeVisible();
+  await expect(column("todo")).toContainText("0/1");
+  await expect(page).toHaveURL(/\?q=install$/);
+  // Esc clears the text.
+  await page.keyboard.press("Escape");
+  await expect(card("Added by an agent")).toBeVisible();
+
+  await page.getByRole("button", { name: "Tags" }).click();
+  await page.getByRole("menuitemcheckbox", { name: /v1/ }).click();
+  await page.keyboard.press("Escape");
+  await expect(card("Added by an agent")).toHaveCount(0);
+  await expect(page).toHaveURL(/tags=v1/);
+  await page.reload();
+  await expect(card("Added by an agent")).toHaveCount(0);
+  await page.getByRole("button", { name: "Clear" }).click();
+  await expect(card("Added by an agent")).toBeVisible();
+
+  await page.getByRole("radio", { name: "Human" }).click();
+  await expect(page.locator("[data-id]")).toHaveCount(0);
+  await page.getByRole("radio", { name: "All" }).click();
+});
+
+test("moves around and moves cards with the keyboard", async () => {
+  await page.locator("header").click();
+  await page.keyboard.press("ArrowDown");
+  const added = card("Added by an agent");
+  await expect(added).toHaveClass(/outline-amber/);
+  // Shift + arrow takes the card to the next column, and the keyboard stays on it.
+  await page.keyboard.press("Shift+ArrowRight");
+  await expect(column("doing").locator("[data-id]", { hasText: "Added by an agent" })).toBeVisible();
+  await expect(added).toHaveClass(/outline-amber/);
+  await page.keyboard.press("Shift+ArrowUp");
+  await expect(column("doing").locator("[data-id]").first()).toContainText("Added by an agent");
+  await page.keyboard.press("ArrowDown");
+  await expect(card("Write the install guide")).toHaveClass(/outline-amber/);
+  await page.keyboard.press("Enter");
+  await expect(panel().getByLabel("Title")).toHaveValue("Write the install guide");
+  await page.keyboard.press("Escape");
+  await expect(panel()).toBeHidden();
+  await page.keyboard.press("?");
+  await expect(page.getByRole("dialog", { name: "Keyboard shortcuts" })).toBeVisible();
+  await page.keyboard.press("Escape");
+});
+
 test("finds a task with search and opens it", async () => {
   await page.keyboard.press("/");
   await page.keyboard.type("install guide");
