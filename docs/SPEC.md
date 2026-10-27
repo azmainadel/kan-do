@@ -227,7 +227,8 @@ A single-page app served from `/`. React Query owns all server state, and SSE ch
 - The task panel slides in from the right at 500 px wide, full width on phones.
 - Dialogs: search (⌘K), sync setup, and confirmations for destructive actions. These replace every `confirm()`.
 - Below 700 px the sidebar becomes a horizontal project strip on top and columns are 78vw wide.
-- Light and dark themes follow the system and use the same neutral palette as now.
+- Light and dark themes follow the system. Both use the brand palette from `assets/brand`: forest green `#1c462d`, sage `#849f7a`, amber `#f4ae1d` and cream `#faf7ed`. In light mode the cream is the page background, forest green is the primary accent, and amber marks highlights such as the focused card. Dark mode uses a deep green-black background with sage and amber as accents.
+- The sidebar shows `logo.svg`. Favicons are `favicon.svg`, `favicon.ico` (16, 32 and 48 px) and `apple-touch-icon.png` (180 px), all in `ui/public`.
 
 ### Cards
 
