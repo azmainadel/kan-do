@@ -6,3 +6,6 @@
 !/internal/web/dist/.gitkeep
 # UI dependencies
 node_modules/
+# Playwright output
+/ui/test-results/
+/ui/playwright-report/
