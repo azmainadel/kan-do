@@ -1,0 +1,11 @@
+# Build output
+/dist/
+/kando
+# UI build output, embedded into the binary
+/internal/web/dist/*
+!/internal/web/dist/.gitkeep
+# UI dependencies
+node_modules/
+# Playwright output
+/ui/test-results/
+/ui/playwright-report/

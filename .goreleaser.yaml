@@ -1,0 +1,41 @@
+# Release builds: `git tag v0.1.0 && git push --tags` runs this in GitHub Actions.
+version: 2
+project_name: kando
+
+before:
+  hooks:
+    # The UI is built into the binary.
+    - make ui
+
+builds:
+  - main: ./cmd/kando
+    binary: kando
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin]
+    goarch: [amd64, arm64, arm]
+    goarm: ["7"]
+    flags: [-trimpath]
+    ldflags:
+      - -s -w -X github.com/azmainadel/kan-do/internal/version.Version={{ .Version }}
+
+archives:
+  # kando_<version>_<os>_<arch>.tar.gz, the name `kando update` and install.sh look for.
+  - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}"
+    formats: [tar.gz]
+    files: [LICENSE, README.md]
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  sort: asc
+  filters:
+    exclude: ["^docs:", "^test:"]
+
+release:
+  github:
+    owner: azmainadel
+    name: kan-do
+  extra_files:
+    - glob: ./install.sh
