@@ -24,10 +24,14 @@ import (
 	"github.com/azmainadel/kan-do/internal/mcp"
 )
 
-// dist is the built UI. Only a placeholder index.html is tracked; `make ui` builds the rest.
+// dist holds the built UI in dist/app; `make ui` builds it. Only dist/.gitkeep is
+// tracked, so a build without Node serves placeholder.html instead.
 //
 //go:embed all:dist
 var dist embed.FS
+
+//go:embed placeholder.html
+var placeholder []byte
 
 // watchInterval is how often the board checks for changes while a page is open.
 const watchInterval = 500 * time.Millisecond
@@ -48,13 +52,23 @@ func handler(h *home.Home, g *guard) http.Handler {
 			mux.Handle(method+" /mcp", m)
 		}
 	}
-	ui, _ := fs.Sub(dist, "dist")
-	mux.Handle("GET /", static(ui))
+	mux.Handle("GET /", static(dist))
 	return g.protect(mux)
 }
 
-// static serves the UI. Vite names its assets by their content, so those are cached for good.
-func static(ui fs.FS) http.Handler {
+// static serves the UI in root's dist/app. Vite names its assets by their content, so
+// those are cached for good.
+func static(root fs.FS) http.Handler {
+	ui, err := fs.Sub(root, "dist/app")
+	if err == nil {
+		_, err = fs.Stat(ui, "index.html")
+	}
+	if err != nil {
+		return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.Write(placeholder)
+		})
+	}
 	files := http.FileServerFS(ui)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/assets/") {
