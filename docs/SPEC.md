@@ -265,7 +265,7 @@ A filter bar above the columns, applied on the client to the loaded board:
 - Owner filter: All, Agent tasks, Human tasks.
 - Project filter in the All view: multi-select.
 
-Column counts show `shown/total` while a filter is on. A "Clear" button resets the filters. Filters live in the URL so a filtered view can be shared: `#<project>/<task>?q=…&tags=a,b&owner=human&projects=x,y`. The done column filters only the done tasks it has loaded, and "Show N older" still loads the rest.
+Column counts show `shown/total` while a filter is on. A "Clear" button resets the filters. Esc in the text box clears it. Picking a single project drops the project filter, which only applies to All projects. Filters live in the URL so a filtered view can be shared: `#<project>/<task>?q=…&tags=a,b&owner=human&projects=x,y`. The done column filters only the done tasks it has loaded, and "Show N older" still loads the rest.
 
 ### Keyboard (new)
 
@@ -300,7 +300,7 @@ Focus rings are visible for keyboard users (`:focus-visible`). Dialogs trap focu
 - `mcp`: the reply format of each tool against a temporary data folder.
 - `sync`: URL candidates and git error reasons, plus an end-to-end test against a bare local repo.
 - `service`: the plist and unit file text, including path quoting.
-- `ui`: Vitest for the move logic, the plain-text preview, tags and times (filters and keyboard navigation get theirs in phase 4). A Playwright smoke test runs the real binary on a fresh data folder: create a project, add a task with `n`, drop an untouched new task, edit tags, comment, drag a card, see an agent's change arrive live, search, delete.
+- `ui`: Vitest for the move logic, filters and their address form, keyboard navigation and Shift moves, the plain-text preview, tags and times. A Playwright smoke test runs the real binary on a fresh data folder: create a project, add a task with `n`, drop an untouched new task, edit tags, comment, drag a card, see an agent's change arrive live, filter by text, tag and owner (and survive a reload), move around and move cards with the keyboard, search, delete.
 - `make lint`, `make test` and `make e2e` run all of the above locally. CI runs the same, plus a cross-compile of every release target.
 
 ## Delivery
