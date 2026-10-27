@@ -113,6 +113,7 @@ func (a *api) routes(mux *http.ServeMux) {
 	mux.HandleFunc("DELETE /api/images/{id}", a.handle(a.deleteImage))
 	mux.HandleFunc("POST /api/images", a.saveImage)
 	mux.HandleFunc("GET /images/{file}", a.imageFile)
+	a.systemRoutes(mux)
 }
 
 type board struct {

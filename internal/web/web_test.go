@@ -334,3 +334,43 @@ func TestStaticUI(t *testing.T) {
 		t.Fatalf("index: %d %s", res.StatusCode, body)
 	}
 }
+
+func TestSyncRoutes(t *testing.T) {
+	b := newBoard(t)
+	var status struct {
+		Remote *string `json:"remote"`
+	}
+	if b.do("GET", "/api/sync", nil, &status); status.Remote != nil {
+		t.Fatalf("remote before setup: %v", *status.Remote)
+	}
+	var e apiError
+	if code := b.do("POST", "/api/sync", map[string]any{}, &e); code != 500 || !strings.Contains(e.Error, "isn't set up") {
+		t.Fatalf("sync before setup: %d %q", code, e.Error)
+	}
+	if code := b.do("PUT", "/api/sync", map[string]any{"url": ""}, &e); code != 400 || !strings.Contains(e.Error, "Paste the URL") {
+		t.Fatalf("empty repo: %d %q", code, e.Error)
+	}
+}
+
+func TestUpdateRoute(t *testing.T) {
+	releases := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		io.WriteString(w, `{"tag_name":"v99.0.0","assets":[]}`)
+	}))
+	defer releases.Close()
+	t.Setenv("KANDO_RELEASES_URL", releases.URL)
+	b := newBoard(t)
+	var info struct {
+		Current   string  `json:"current"`
+		Latest    *string `json:"latest"`
+		Available *string `json:"available"`
+	}
+	b.do("GET", "/api/update?now=1", nil, &info)
+	if info.Current == "" || info.Latest == nil || *info.Latest != "99.0.0" || info.Available == nil {
+		t.Fatalf("update status: %+v", info)
+	}
+	// A release without a build for this machine is refused before anything changes.
+	var e apiError
+	if code := b.do("POST", "/api/update", nil, &e); code != 500 || !strings.Contains(e.Error, "for this machine") {
+		t.Fatalf("install: %d %q", code, e.Error)
+	}
+}
