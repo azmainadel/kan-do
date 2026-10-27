@@ -1,4 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 // One board, used in order, like a person would: each step builds on the last.
 test.describe.configure({ mode: "serial" });
@@ -146,4 +150,18 @@ test("deletes a task after asking", async () => {
   await page.getByRole("alertdialog").getByRole("button", { name: "Delete task" }).click();
   await expect(panel()).toBeHidden();
   await expect(card("Write the install guide")).toHaveCount(0);
+});
+
+test("sets up sync from the board and syncs", async () => {
+  const repo = join(mkdtempSync(join(tmpdir(), "kan-do-e2e-repo-")), "board.git");
+  execFileSync("git", ["init", "--quiet", "--bare", "--initial-branch", "main", repo]);
+  await page.getByRole("button", { name: "Sync", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Sync your board" });
+  await dialog.getByLabel("Repository URL").fill(repo);
+  await dialog.getByRole("button", { name: "Save and sync" }).click();
+  await expect(page.getByText("Pushed the board to origin/main for the first time.")).toBeVisible();
+  // The sidebar shows the repo, and the next sync has nothing to do.
+  await expect(page.getByTitle(`Syncs with ${repo}. Click to change.`)).toBeVisible();
+  await page.getByRole("button", { name: "Sync", exact: true }).click();
+  await expect(page.getByText("Already in sync with origin/main.")).toBeVisible();
 });
