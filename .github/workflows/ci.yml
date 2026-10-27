@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+      - run: make lint
+      - run: make test
+      - run: cd ui && npx playwright install --with-deps chromium
+      - run: make e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: ui/test-results/
+
+  cross-compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      # The same targets as .goreleaser.yaml. The UI isn't built here, so
+      # the binary falls back to its placeholder page.
+      - name: Build every release target
+        env:
+          CGO_ENABLED: "0"
+        run: |
+          targets="linux/amd64 linux/arm64 linux/arm/7"
+          targets="$targets darwin/amd64 darwin/arm64"
+          for target in $targets; do
+            IFS=/ read -r os arch arm <<< "$target"
+            echo "Building $target"
+            GOOS=$os GOARCH=$arch GOARM=$arm \
+              go build -trimpath -o /dev/null ./cmd/kando
+          done
