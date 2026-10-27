@@ -39,7 +39,7 @@ archive="kando_${version}_${os}_${arch}.tar.gz"
 
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
-echo "Downloading kando $version for $os/$arch…"
+echo "Downloading kando $version for $os/${arch}…"
 curl -fsSL -o "$tmp/$archive" "$base/$archive" || fail "cannot download $archive"
 curl -fsSL -o "$tmp/checksums.txt" "$base/checksums.txt" || fail "cannot download checksums.txt"
 
