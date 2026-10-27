@@ -11,11 +11,13 @@ interface Props {
   /** The project's color, shown as a dot on All projects to tell projects apart. */
   projectDot: string | null;
   open: boolean;
+  /** The keyboard is on this card. */
+  focused?: boolean;
   onOpen: (id: number) => void;
 }
 
 /** A card on the board, draggable within and across columns. */
-export const Card = memo(function Card({ task, projectDot, open, onOpen }: Props) {
+export const Card = memo(function Card({ task, projectDot, open, focused, onOpen }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id });
   return (
     <div
@@ -25,7 +27,7 @@ export const Card = memo(function Card({ task, projectDot, open, onOpen }: Props
       {...listeners}
       data-id={task.id}
       onClick={() => onOpen(task.id)}
-      className={`touch-manipulation ${isDragging ? "opacity-40" : ""}`}
+      className={`touch-manipulation rounded-[14px] ${isDragging ? "opacity-40" : ""} ${focused ? "outline-2 -outline-offset-2 outline-amber" : ""}`}
     >
       <CardBody task={task} projectDot={projectDot} open={open} />
     </div>

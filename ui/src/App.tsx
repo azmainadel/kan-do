@@ -1,11 +1,13 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast, Toaster } from "sonner";
 import { ApiError, api } from "./api";
 import { Board } from "./components/Board";
 import { Logo, fail } from "./components/bits";
 import { useConfirm } from "./components/Confirm";
+import { FilterBar } from "./components/FilterBar";
 import { Header } from "./components/Header";
+import { Shortcuts } from "./components/Shortcuts";
 import { Search } from "./components/Search";
 import { Sidebar, useDeleteProject } from "./components/Sidebar";
 import { SyncDialog } from "./components/SyncDialog";
@@ -13,6 +15,7 @@ import { useEvents } from "./hooks/useEvents";
 import { useRoute } from "./hooks/useRoute";
 import { storage, useStoredFlag } from "./hooks/useStored";
 import { applyMove } from "./lib/board";
+import { filtersQuery, isFiltering, matches, parseFilters } from "./lib/filter";
 import { repoName } from "./lib/text";
 import type { Board as BoardData, Task } from "./types";
 
@@ -25,7 +28,13 @@ export function App() {
   const qc = useQueryClient();
   const confirm = useConfirm();
   const route = useRoute();
-  const { project, task: openTask, setProject, setTask } = route;
+  const { project, task: openTask, setProject, setTask, filters, setFilters } = route;
+  // Keyed by the query text, so the board only refilters when a filter changes.
+  const filterKey = filtersQuery(filters);
+  const visible = useMemo(() => {
+    const f = parseFilters(filterKey);
+    return (t: Task) => matches(t, f);
+  }, [filterKey]);
 
   // The server leaves out older done tasks unless asked: the board doesn't show them.
   const [allDone, setAllDone] = useState(false);
@@ -152,6 +161,7 @@ export function App() {
   });
 
   const [searching, setSearching] = useState(false);
+  const [shortcuts, setShortcuts] = useState(false);
   const pick = (t: Task) => {
     if (project !== "all" && project !== t.project) selectProject(t.project);
     open(t.id);
@@ -252,30 +262,27 @@ export function App() {
 
   const [doneCollapsed, setDoneCollapsed] = useStoredFlag("kan-do.doneCollapsed", true);
 
-  // Keys that work anywhere on the board, unless typing.
+  // Keys that work anywhere on the board, unless typing or in a dialog. The board itself
+  // handles the arrows, Enter and c for the card the keyboard is on.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        return setSearching(true);
+      }
       const typing = (e.target as HTMLElement).closest("input, textarea, select, [contenteditable]");
-      if ((e.key === "/" && !typing && !e.metaKey && !e.ctrlKey) || (e.key === "k" && (e.metaKey || e.ctrlKey))) {
+      const dialog = document.querySelector("[role=dialog], [role=alertdialog]");
+      if (typing || dialog || e.metaKey || e.ctrlKey || e.altKey) return;
+      const act = {
+        "/": () => setSearching(true),
+        "?": () => setShortcuts(true),
+        n: newTask,
+        f: () => document.getElementById("filter-input")?.focus(),
+        Escape: () => openTask && closeTask(),
+      }[e.key];
+      if (act) {
         e.preventDefault();
-        setSearching(true);
-      } else if (
-        e.key === "n" &&
-        !typing &&
-        !e.metaKey &&
-        !e.ctrlKey &&
-        !e.altKey &&
-        !document.querySelector("[role=dialog]")
-      ) {
-        e.preventDefault();
-        newTask();
-      } else if (
-        e.key === "Escape" &&
-        openTask &&
-        !typing &&
-        !document.querySelector("[role=dialog], [role=alertdialog]")
-      ) {
-        closeTask();
+        act();
       }
     };
     addEventListener("keydown", onKey);
@@ -334,6 +341,14 @@ export function App() {
           {data.projects.length ? (
             <>
               <Header project={current} projects={data.projects} />
+              <FilterBar
+                filters={filters}
+                onChange={setFilters}
+                tasks={data.tasks}
+                projects={data.projects}
+                all={project === "all"}
+                onHelp={() => setShortcuts(true)}
+              />
               <Board
                 board={data}
                 all={project === "all"}
@@ -345,6 +360,8 @@ export function App() {
                 onShowAllDone={() => setAllDone(true)}
                 onMove={move}
                 onDragging={onDragging}
+                visible={visible}
+                filtering={isFiltering(filters)}
               />
             </>
           ) : (
@@ -374,6 +391,7 @@ export function App() {
           />
         </Suspense>
       )}
+      <Shortcuts open={shortcuts} onOpenChange={setShortcuts} />
       <Search open={searching} onOpenChange={setSearching} projects={data.projects} onPick={pick} />
       <SyncDialog
         open={syncSetup}

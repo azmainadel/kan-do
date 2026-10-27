@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -22,9 +22,11 @@ import {
 } from "@dnd-kit/sortable";
 import { ChevronsLeft, ChevronsRight, Plus } from "lucide-react";
 import { columnsOf, dropTarget } from "../lib/board";
+import { direction, navigate, shift } from "../lib/keys";
+import { taskKey } from "../lib/text";
 import { projectColor } from "../lib/colors";
 import type { Board as BoardData, Task } from "../types";
-import { StatusIcon } from "./bits";
+import { StatusIcon, copyText } from "./bits";
 import { Card, CardBody } from "./Card";
 
 type Columns = Record<string, number[]>;
@@ -42,6 +44,9 @@ interface Props {
   onMove: (id: number, status: string, before: number | null) => void;
   /** Called with true when a drag starts and false when it ends, so refreshes wait. */
   onDragging: (dragging: boolean) => void;
+  /** Whether a card passes the filter bar. */
+  visible: (t: Task) => boolean;
+  filtering: boolean;
 }
 
 const columnId = (status: string) => `column:${status}`;
@@ -57,9 +62,12 @@ export function Board({
   onShowAllDone,
   onMove,
   onDragging,
+  visible,
+  filtering,
 }: Props) {
   const { statuses, tasks, projects } = board;
-  const derived = useMemo(() => columnsOf(tasks, statuses), [tasks, statuses]);
+  const derived = useMemo(() => columnsOf(tasks.filter(visible), statuses), [tasks, statuses, visible]);
+  const totals = useMemo(() => columnsOf(tasks, statuses), [tasks, statuses]);
   const byId = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
   // While dragging, the order shown is ours; otherwise the board's.
   const [order, setOrder] = useState<Columns | null>(null);
@@ -125,6 +133,46 @@ export function Board({
   };
 
   const last = statuses.length - 1;
+
+  // The card the keyboard is on: arrows move it, Enter opens it, Shift + arrows move the card.
+  const [focused, setFocused] = useState<number | null>(null);
+  const open = (id: number) => {
+    setFocused(id);
+    onOpen(id);
+  };
+  useEffect(() => {
+    if (focused !== null)
+      document.querySelector(`[data-id="${focused}"]`)?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [focused]);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const typing = (e.target as HTMLElement).closest("input, textarea, select, [contenteditable]");
+      if (typing || active || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (document.querySelector("[role=dialog], [role=alertdialog], [data-radix-popper-content-wrapper]")) return;
+      const dir = direction(e.key);
+      // Cards of a collapsed column can't be seen, so the keyboard passes them by.
+      const seen = doneCollapsed ? { ...derived, [statuses[last]!]: [] } : derived;
+      const current = focused !== null && byId.has(focused) && visible(byId.get(focused)!) ? focused : null;
+      if (dir && e.shiftKey && current !== null) {
+        e.preventDefault();
+        const to = shift(derived, statuses, current, dir);
+        if (to) onMove(current, to.status, to.before);
+      } else if (dir && !e.shiftKey) {
+        e.preventDefault();
+        setFocused(navigate(seen, statuses, current, dir));
+      } else if (e.key === "Enter" && current !== null) {
+        e.preventDefault();
+        onOpen(current);
+      } else if (e.key === "c" && current !== null) {
+        copyText(taskKey(byId.get(current)!));
+      } else if (e.key === "Escape" && !openTask) {
+        setFocused(null);
+      }
+    };
+    addEventListener("keydown", onKey);
+    return () => removeEventListener("keydown", onKey);
+  });
+
   return (
     <DndContext
       sensors={sensors}
@@ -145,12 +193,13 @@ export function Board({
         {statuses.map((status, i) => {
           const ids = cols[status] ?? [];
           const hidden = i === last ? board.done_hidden : 0;
+          const total = (totals[status]?.length ?? 0) + hidden;
           return (
             <Column
               key={status}
               status={status}
               statuses={statuses}
-              count={ids.length + hidden}
+              count={filtering ? `${ids.length}/${total}` : total ? String(total) : ""}
               first={i === 0}
               collapsible={i === last}
               collapsed={i === last && doneCollapsed}
@@ -175,7 +224,8 @@ export function Board({
                         task={t}
                         projectDot={all ? projectColor(t.project, projects) : null}
                         open={openTask === id}
-                        onOpen={onOpen}
+                        focused={focused === id}
+                        onOpen={open}
                       />
                     )
                   );
@@ -202,7 +252,8 @@ export function Board({
 interface ColumnProps {
   status: string;
   statuses: string[];
-  count: number;
+  /** The number of cards, or shown/total while filtering. */
+  count: string;
   first: boolean;
   collapsible: boolean;
   collapsed: boolean;
@@ -230,7 +281,7 @@ function Column({ status, statuses, count, first, collapsible, collapsed, onColl
         )}
         <StatusIcon status={status} statuses={statuses} />
         {status}
-        <span className="font-normal text-faint">{count || ""}</span>
+        <span className="font-normal text-faint tabular-nums">{count}</span>
         {first && (
           <button
             className="icon-btn -my-1.5 -mr-1.5 ml-auto"
