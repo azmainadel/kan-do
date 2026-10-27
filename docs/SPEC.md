@@ -43,7 +43,7 @@ ui/                  React app (Vite); builds into internal/web/dist
 docs/                this spec
 ```
 
-`internal/web/dist` is generated and git-ignored, apart from a placeholder `index.html` so `go build` works without Node. The placeholder says to run `make ui`. Release builds run the UI build first.
+The UI builds into `internal/web/dist/app`, which is git-ignored. `go build` works without Node: with no build there, the server serves an embedded `placeholder.html` that says to run `make ui`. Release builds run the UI build first. `make dev` runs Vite with hot reload and proxies the API to a running board.
 
 ## Data folder
 
@@ -228,7 +228,7 @@ A single-page app served from `/`. React Query owns all server state, and SSE ch
 - Dialogs: search (⌘K), sync setup, and confirmations for destructive actions. These replace every `confirm()`.
 - Below 700 px the sidebar becomes a horizontal project strip on top and columns are 78vw wide.
 - Light and dark themes follow the system. Both use the brand palette from `assets/brand`: forest green `#1c462d`, sage `#849f7a`, amber `#f4ae1d` and cream `#faf7ed`. In light mode the cream is the page background, forest green is the primary accent, and amber marks highlights such as the focused card. Dark mode uses a deep green-black background with sage and amber as accents.
-- The sidebar shows `logo.svg`. Favicons are `favicon.svg`, `favicon.ico` (16, 32 and 48 px) and `apple-touch-icon.png` (180 px), all in `ui/public`.
+- The sidebar draws the logo inline, so its dark bar can turn light in dark mode. Favicons are `favicon.svg`, `favicon.ico` (16, 32 and 48 px) and `apple-touch-icon.png` (180 px), all in `ui/public`.
 
 ### Cards
 
@@ -300,8 +300,8 @@ Focus rings are visible for keyboard users (`:focus-visible`). Dialogs trap focu
 - `mcp`: the reply format of each tool against a temporary data folder.
 - `sync`: URL candidates and git error reasons, plus an end-to-end test against a bare local repo.
 - `service`: the plist and unit file text, including path quoting.
-- `ui`: Vitest for the filter logic, the plain-text preview and keyboard navigation, and a Playwright smoke test (create a project and task, drag it, filter, search).
-- CI: `go vet`, `staticcheck`, `go test -race`, `npm run lint`, `npm run typecheck`, `npm test`, and a cross-compile of every release target.
+- `ui`: Vitest for the move logic, the plain-text preview, tags and times (filters and keyboard navigation get theirs in phase 4). A Playwright smoke test runs the real binary on a fresh data folder: create a project, add a task with `n`, drop an untouched new task, edit tags, comment, drag a card, see an agent's change arrive live, search, delete.
+- `make lint`, `make test` and `make e2e` run all of the above locally. CI runs the same, plus a cross-compile of every release target.
 
 ## Delivery
 
