@@ -197,11 +197,13 @@ Runs `git` in the data folder.
 - If the local branch doesn't exist on the remote: push it when the remote has no branches, follow it when the remote has exactly one other branch, and fail when it has several.
 - Ahead only: push. Behind only: fast-forward under the lock, then migrate. Both: return `Diverged{first}` unless `keep` is set. `keep=local` force-pushes with lease. `keep=remote` copies the database to `kan-do.db.bak`, then hard-resets under the lock and migrates.
 - From the UI, git never prompts (`GIT_TERMINAL_PROMPT=0`, `ssh -o BatchMode=yes`), and failures are cut down to the one line that explains them.
+- The Go package is `gitsync`, so it doesn't shadow the standard library's `sync`.
 
 ## Update
 
 - `GET https://api.github.com/repos/azmainadel/kan-do/releases/latest` through Go's HTTP client, cached for 24 hours unless `now` is set. `KANDO_RELEASES_URL` overrides the base URL for tests.
 - Install: download the archive for this OS and architecture plus `checksums.txt`, check the SHA-256, write the new binary next to the current one, and rename it over the current one. On success, `exec` the new binary with the same arguments plus `--no-open`.
+- Release archives are named `kan-do_<version>_<os>_<arch>.tar.gz` (`armv7` for 32-bit ARM), as GoReleaser names them, next to a `checksums.txt` of `<sha256>  <file>` lines.
 - This works wherever the binary's folder is writable, unlike an installer script that needs a `bin` folder.
 
 ## Service
