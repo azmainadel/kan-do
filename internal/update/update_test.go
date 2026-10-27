@@ -75,7 +75,7 @@ func releaseServer(t *testing.T, archive []byte, sums string) {
 }
 
 func TestLatestAndInstallPieces(t *testing.T) {
-	archive := tarGz(t, map[string]string{"README.md": "hi", "kan-do": "new program"})
+	archive := tarGz(t, map[string]string{"README.md": "hi", "kando": "new program"})
 	sum := sha256.Sum256(archive)
 	sums := hex.EncodeToString(sum[:]) + "  " + Archive("9.9.9") + "\n"
 	releaseServer(t, archive, sums)
@@ -92,12 +92,12 @@ func TestLatestAndInstallPieces(t *testing.T) {
 	if err := verify(archive, []byte(sums), "other.tar.gz"); err == nil {
 		t.Fatal("missing checksum line accepted")
 	}
-	bin, err := extract(archive, "kan-do")
+	bin, err := extract(archive, "kando")
 	if err != nil || string(bin) != "new program" {
 		t.Fatalf("extract: %q %v", bin, err)
 	}
 
-	exe := filepath.Join(t.TempDir(), "kan-do")
+	exe := filepath.Join(t.TempDir(), "kando")
 	os.WriteFile(exe, []byte("old program"), 0o755)
 	if err := replace(exe, bin); err != nil {
 		t.Fatal(err)
@@ -107,7 +107,7 @@ func TestLatestAndInstallPieces(t *testing.T) {
 	if string(got) != "new program" || info.Mode().Perm() != 0o755 {
 		t.Fatalf("replaced with %q, mode %v", got, info.Mode())
 	}
-	if left, _ := filepath.Glob(filepath.Join(filepath.Dir(exe), ".kan-do-update-*")); len(left) > 0 {
+	if left, _ := filepath.Glob(filepath.Join(filepath.Dir(exe), ".kando-update-*")); len(left) > 0 {
 		t.Fatalf("temporary files left: %v", left)
 	}
 }

@@ -1,4 +1,4 @@
-// Package store holds all reads and writes of kan-do.db: plain SQL, one short-lived
+// Package store holds all reads and writes of kando.db: plain SQL, one short-lived
 // connection per operation.
 //
 // The database uses a rollback journal (journal_mode=TRUNCATE), not WAL. With a
@@ -172,7 +172,7 @@ func (s *Store) Now() (string, error) {
 	return t, dbErr(err)
 }
 
-// Settle makes kan-do.db complete on its own: it rolls back a write that a crashed
+// Settle makes kando.db complete on its own: it rolls back a write that a crashed
 // process left half done, and folds in a leftover WAL.
 func (s *Store) Settle() error {
 	var n int64

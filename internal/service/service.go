@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	label = "com.github.azmainadel.kan-do"
-	unit  = "kan-do.service"
+	label = "com.github.azmainadel.kando"
+	unit  = "kando.service"
 )
 
 // Install installs and starts the service, replacing an older one.
@@ -34,7 +34,7 @@ func Install(h *home.Home) error {
 	case "linux":
 		return installSystemd(h, exe)
 	}
-	return errors.New("kan-do service supports macOS and Linux; start `kan-do --no-open` with your own service manager")
+	return errors.New("kando service supports macOS and Linux; start `kando --no-open` with your own service manager")
 }
 
 // Uninstall stops and removes the service.
@@ -45,7 +45,7 @@ func Uninstall() error {
 	case "linux":
 		return uninstallSystemd()
 	}
-	return errors.New("kan-do service supports macOS and Linux")
+	return errors.New("kando service supports macOS and Linux")
 }
 
 // Restart restarts the service, if it's installed, so it runs a newly installed kan-do.
@@ -129,7 +129,7 @@ func installLaunchd(h *home.Home, exe string) error {
 	if err != nil {
 		return err
 	}
-	log := filepath.Join(userHome, "Library/Logs/kan-do.log")
+	log := filepath.Join(userHome, "Library/Logs/kando.log")
 	path, _ := plistPath()
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
@@ -215,7 +215,7 @@ func installSystemd(h *home.Home, exe string) error {
 		}
 	}
 	fmt.Printf("kan-do now starts at login and is running at http://localhost:%d\n"+
-		"Logs: journalctl --user -u kan-do\n"+
+		"Logs: journalctl --user -u kando\n"+
 		"To start it at boot without logging in (a board with no screen): sudo loginctl enable-linger $USER\n", h.Config.Port)
 	return nil
 }
@@ -227,13 +227,13 @@ func uninstallSystemd() error {
 	}
 	exec.Command("systemctl", "--user", "disable", "--now", unit).Run()
 	if !exists(path) {
-		fmt.Println("The kan-do service was not installed.")
+		fmt.Println("The kando service was not installed.")
 		return nil
 	}
 	if err := os.Remove(path); err != nil {
 		return fmt.Errorf("cannot remove %s: %w", path, err)
 	}
 	exec.Command("systemctl", "--user", "daemon-reload").Run()
-	fmt.Println("Removed the kan-do service; the board no longer starts at login.")
+	fmt.Println("Removed the kando service; the board no longer starts at login.")
 	return nil
 }

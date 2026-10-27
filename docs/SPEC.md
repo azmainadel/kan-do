@@ -2,6 +2,8 @@
 
 kan-do is a kanban board for one person and their coding agents. One program serves the board in the browser and an MCP server for agents, and both read and write the same SQLite file. A private git repo keeps the board in step across machines. There are no accounts and no hosted server.
 
+kan-do is the product and repo name. Everything a person types or the program uses is `kando`: the command and binary, the data folder `~/kando`, its files, the service, and the MCP server name.
+
 This spec covers v0.1: the full feature set below, a Go backend, and a React frontend built into the binary.
 
 ## Goals
@@ -30,7 +32,7 @@ Out of scope for v0.1: accounts and logins, Windows, hosted or multi-user mode, 
 ## Repository layout
 
 ```
-cmd/kan-do/          main package: CLI wiring only
+cmd/kando/          main package: CLI wiring only
 internal/home/       data folder, config.toml, file lock
 internal/store/      schema, migrations, all SQL
 internal/web/        HTTP API, SSE, static files, host guard
@@ -47,16 +49,16 @@ The UI builds into `internal/web/dist/app`, which is git-ignored. `go build` wor
 
 ## Data folder
 
-The data folder is chosen in this order: `--home <dir>`, then `$KANDO_HOME`, then `~/kan-do`. It holds:
+The data folder is chosen in this order: `--home <dir>`, then `$KANDO_HOME`, then `~/kando`. It holds:
 
 | File | Purpose |
 | --- | --- |
-| `kan-do.db` | The board |
+| `kando.db` | The board |
 | `config.toml` | Settings, written with comments on first run |
 | `images/` | Attached images, named `<16 hex>.<png\|jpg\|gif\|webp>` by a hash of their content |
-| `kan-do.lock` | Lock file. Every operation takes a shared lock and sync takes an exclusive one. |
+| `kando.lock` | Lock file. Every operation takes a shared lock and sync takes an exclusive one. |
 | `.gitignore` | Leaves out the journal, lock and `*.bak` files |
-| `kan-do.db.bak` | The old board, kept when sync takes the remote one |
+| `kando.db.bak` | The old board, kept when sync takes the remote one |
 
 ### config.toml
 
@@ -84,7 +86,7 @@ Tables:
 
 Triggers on every insert, update and delete increment `meta.changes`. Deleting a project cascades to its tasks, comments and images.
 
-Migrations are a numbered list applied in order (currently six). A database whose `schema_version` is newer than this build still opens if its `compatible` value is at or below this build's version. Otherwise the error tells the person to run `kan-do update`. `migrate` writes nothing when the schema is already current, because every agent session starts a process that calls it.
+Migrations are a numbered list applied in order (currently six). A database whose `schema_version` is newer than this build still opens if its `compatible` value is at or below this build's version. Otherwise the error tells the person to run `kando update`. `migrate` writes nothing when the schema is already current, because every agent session starts a process that calls it.
 
 Timestamps are UTC strings in the form `2026-10-25T09:30:00Z`.
 
@@ -111,14 +113,14 @@ These match the existing behaviour exactly. Unit tests pin them down.
 
 | Command | Does |
 | --- | --- |
-| `kan-do` | Starts the board on the configured port and opens the browser. `--port`, `--no-open`. If kan-do is already running on that port, it just opens the browser. |
-| `kan-do mcp` | MCP server on stdio. Agents start it. |
-| `kan-do init [dir]` | Creates the data folder |
-| `kan-do sync` | Commits, then pulls or pushes. `--repo <url>`, `--keep-local`, `--keep-remote`. |
-| `kan-do export` | `-f markdown\|json`, `-p <project>`, `-o <file>` |
-| `kan-do service install\|uninstall` | LaunchAgent on macOS, systemd user unit on Linux |
-| `kan-do update` | Installs the latest release and restarts the service if there is one |
-| `kan-do --version` | Prints the version |
+| `kando` | Starts the board on the configured port and opens the browser. `--port`, `--no-open`. If kan-do is already running on that port, it just opens the browser. |
+| `kando mcp` | MCP server on stdio. Agents start it. |
+| `kando init [dir]` | Creates the data folder |
+| `kando sync` | Commits, then pulls or pushes. `--repo <url>`, `--keep-local`, `--keep-remote`. |
+| `kando export` | `-f markdown\|json`, `-p <project>`, `-o <file>` |
+| `kando service install\|uninstall` | LaunchAgent on macOS, systemd user unit on Linux |
+| `kando update` | Installs the latest release and restarts the service if there is one |
+| `kando --version` | Prints the version |
 
 Every command accepts `--home`.
 
@@ -128,7 +130,7 @@ All JSON. Errors are `{"error": "..."}` with status 400 (invalid input), 404 (no
 
 | Method and path | Body or query | Returns |
 | --- | --- | --- |
-| `GET /api/ping` | | `kan-do` as plain text, used to detect a running board |
+| `GET /api/ping` | | `kando` as plain text, used to detect a running board |
 | `GET /api/events` | | SSE stream, described below |
 | `GET /api/board` | `?project=<slug\|all>&done=all` | `{changes, done_hidden, projects[], statuses[], tasks[], version}` |
 | `GET /api/search` | `?q=` | `Task[]` |
@@ -158,7 +160,7 @@ Project: `{id, slug, name, repos[], color, created_at, open, total}`. Task: `{id
 
 ### Live updates
 
-`GET /api/events` is a Server-Sent Events stream. A single watcher goroutine runs while at least one client is connected. Every 500 ms it reads the change token, made of `meta.changes` and the database file's inode, and sends `event: change` with the token whenever the token differs from the last one. The inode is included so a database replaced by sync always counts as a change. Polling the token is the only way to see writes from `kan-do mcp` processes, and it costs one indexed read. The stream also sends a comment line every 25 s so proxies keep it open. The UI shows an offline banner while the stream is disconnected and reloads the board when it reconnects.
+`GET /api/events` is a Server-Sent Events stream. A single watcher goroutine runs while at least one client is connected. Every 500 ms it reads the change token, made of `meta.changes` and the database file's inode, and sends `event: change` with the token whenever the token differs from the last one. The inode is included so a database replaced by sync always counts as a change. Polling the token is the only way to see writes from `kando mcp` processes, and it costs one indexed read. The stream also sends a comment line every 25 s so proxies keep it open. The UI shows an offline banner while the stream is disconnected and reloads the board when it reconnects.
 
 ### Security
 
@@ -169,7 +171,7 @@ Project: `{id, slug, name, repos[], color, created_at, open, total}`. Task: `{id
 
 ## MCP
 
-The server name is `kan-do`. It runs over stdio (`kan-do mcp`) and, when `mcp_http` is on, as streamable HTTP at `/mcp` behind the same host check. Replies are plain text.
+The server name is `kando`. It runs over stdio (`kando mcp`) and, when `mcp_http` is on, as streamable HTTP at `/mcp` behind the same host check. Replies are plain text.
 
 Over stdio the server reads the git remotes of its working directory, with `origin` first. When an agent leaves out `project`, the server uses the project linked to one of those repos. Over HTTP the agent has to pass `project`. Error messages name the known projects and say how to fix the call.
 
@@ -193,9 +195,9 @@ Over stdio the server reads the git remotes of its working directory, with `orig
 Runs `git` in the data folder.
 
 - Setting a repo: try the URL. `owner/repo` expands to the GitHub SSH URL and then the HTTPS one, and the first that answers `git ls-remote` wins. On first setup, `git init` with the remote's default branch, then add or replace `origin`.
-- Syncing: fetch, take the exclusive lock, settle the database (make it complete without its journal), `git add --all`, release the lock, then commit `kan-do sync from <hostname>`. If git has no user configured, the commit uses `kan-do <kan-do@localhost>`.
+- Syncing: fetch, take the exclusive lock, settle the database (make it complete without its journal), `git add --all`, release the lock, then commit `kando sync from <hostname>`. If git has no user configured, the commit uses `kando <kando@localhost>`.
 - If the local branch doesn't exist on the remote: push it when the remote has no branches, follow it when the remote has exactly one other branch, and fail when it has several.
-- Ahead only: push. Behind only: fast-forward under the lock, then migrate. Both: return `Diverged{first}` unless `keep` is set. `keep=local` force-pushes with lease. `keep=remote` copies the database to `kan-do.db.bak`, then hard-resets under the lock and migrates.
+- Ahead only: push. Behind only: fast-forward under the lock, then migrate. Both: return `Diverged{first}` unless `keep` is set. `keep=local` force-pushes with lease. `keep=remote` copies the database to `kando.db.bak`, then hard-resets under the lock and migrates.
 - From the UI, git never prompts (`GIT_TERMINAL_PROMPT=0`, `ssh -o BatchMode=yes`), and failures are cut down to the one line that explains them.
 - The Go package is `gitsync`, so it doesn't shadow the standard library's `sync`.
 
@@ -203,14 +205,14 @@ Runs `git` in the data folder.
 
 - `GET https://api.github.com/repos/azmainadel/kan-do/releases/latest` through Go's HTTP client, cached for 24 hours unless `now` is set. `KANDO_RELEASES_URL` overrides the base URL for tests.
 - Install: download the archive for this OS and architecture plus `checksums.txt`, check the SHA-256, write the new binary next to the current one, and rename it over the current one. On success, `exec` the new binary with the same arguments plus `--no-open`.
-- Release archives are named `kan-do_<version>_<os>_<arch>.tar.gz` (`armv7` for 32-bit ARM), as GoReleaser names them, next to a `checksums.txt` of `<sha256>  <file>` lines.
+- Release archives are named `kando_<version>_<os>_<arch>.tar.gz` (`armv7` for 32-bit ARM), as GoReleaser names them, next to a `checksums.txt` of `<sha256>  <file>` lines.
 - This works wherever the binary's folder is writable, unlike an installer script that needs a `bin` folder.
 
 ## Service
 
-- macOS: LaunchAgent `com.github.azmainadel.kan-do` running `kan-do --no-open --home <dir>`, with KeepAlive on failure and logs in `~/Library/Logs/kan-do.log`.
-- Linux: systemd user unit `kan-do.service` with `Restart=on-failure`. After install it prints the `loginctl enable-linger` hint for headless machines.
-- `kan-do update` restarts the service when one is installed.
+- macOS: LaunchAgent `com.github.azmainadel.kando` running `kando --no-open --home <dir>`, with KeepAlive on failure and logs in `~/Library/Logs/kando.log`.
+- Linux: systemd user unit `kando.service` with `Restart=on-failure`. After install it prints the `loginctl enable-linger` hint for headless machines.
+- `kando update` restarts the service when one is installed.
 
 ## Export
 

@@ -153,7 +153,7 @@ test("deletes a task after asking", async () => {
 });
 
 test("sets up sync from the board and syncs", async () => {
-  const repo = join(mkdtempSync(join(tmpdir(), "kan-do-e2e-repo-")), "board.git");
+  const repo = join(mkdtempSync(join(tmpdir(), "kando-e2e-repo-")), "board.git");
   execFileSync("git", ["init", "--quiet", "--bare", "--initial-branch", "main", repo]);
   await page.getByRole("button", { name: "Sync", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "Sync your board" });

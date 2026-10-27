@@ -88,7 +88,7 @@ func Serve(ctx context.Context, h *home.Home, port uint16, open bool) error {
 	url := fmt.Sprintf("http://localhost:%d", port)
 	ln, err := net.Listen("tcp", netip.AddrPortFrom(listen, port).String())
 	if errors.Is(err, syscall.EADDRINUSE) {
-		if isKanDo(port) {
+		if isKando(port) {
 			fmt.Printf("kan-do is already running at %s\n", url)
 			if open {
 				openBrowser(url)
@@ -150,8 +150,8 @@ func Serve(ctx context.Context, h *home.Home, port uint16, open bool) error {
 	return srv.Shutdown(stop)
 }
 
-// isKanDo reports whether the program on port answers like a kan-do board.
-func isKanDo(port uint16) bool {
+// isKando reports whether the program on port answers like a kan-do board.
+func isKando(port uint16) bool {
 	c := http.Client{Timeout: 2 * time.Second}
 	res, err := c.Get("http://127.0.0.1:" + strconv.Itoa(int(port)) + "/api/ping")
 	if err != nil {
@@ -159,7 +159,7 @@ func isKanDo(port uint16) bool {
 	}
 	defer res.Body.Close()
 	body, _ := io.ReadAll(io.LimitReader(res.Body, 64))
-	return string(body) == "kan-do"
+	return string(body) == "kando"
 }
 
 func openBrowser(url string) {

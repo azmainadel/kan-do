@@ -1,6 +1,6 @@
 # Build output
 /dist/
-/kan-do
+/kando
 # UI build output, embedded into the binary
 /internal/web/dist/*
 !/internal/web/dist/.gitkeep

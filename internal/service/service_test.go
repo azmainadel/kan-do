@@ -8,8 +8,8 @@ import (
 )
 
 func TestUnitQuotesPaths(t *testing.T) {
-	text := unitFile("/home/pi/go/bin/kan-do", `/home/pi/my "kan-do" 100%`)
-	if !strings.Contains(text, `ExecStart="/home/pi/go/bin/kan-do" --no-open --home "/home/pi/my \"kan-do\" 100%%"`) {
+	text := unitFile("/home/pi/go/bin/kando", `/home/pi/my "kan-do" 100%`)
+	if !strings.Contains(text, `ExecStart="/home/pi/go/bin/kando" --no-open --home "/home/pi/my \"kan-do\" 100%%"`) {
 		t.Fatal(text)
 	}
 	if !strings.Contains(text, "WantedBy=default.target") {
@@ -18,7 +18,7 @@ func TestUnitQuotesPaths(t *testing.T) {
 }
 
 func TestPlistIsValidXML(t *testing.T) {
-	text := plist("/usr/local/bin/kan-do", "/Users/a & b/kan-do", "/tmp/k.log")
+	text := plist("/usr/local/bin/kando", "/Users/a & b/kan-do", "/tmp/k.log")
 	if !strings.Contains(text, "/Users/a &amp; b/kan-do") {
 		t.Fatal(text)
 	}

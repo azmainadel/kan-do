@@ -19,7 +19,7 @@ function read(): Route {
   }
   const [slug, task] = decoded.split("/");
   return {
-    project: slug || storage.get("kan-do.project") || "all",
+    project: slug || storage.get("kando.project") || "all",
     task: Number(task) || null,
     filters: parseFilters(query),
   };
@@ -44,7 +44,7 @@ export function useRoute() {
 
   // Picking one project drops the project filter, which only applies to All projects.
   const setProject = useCallback((project: string) => {
-    storage.set("kan-do.project", project);
+    storage.set("kando.project", project);
     setRoute((r) => ({ ...r, project, filters: project === "all" ? r.filters : { ...r.filters, projects: [] } }));
   }, []);
   const setTask = useCallback((task: number | null) => setRoute((r) => ({ ...r, task })), []);

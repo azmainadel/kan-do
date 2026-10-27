@@ -12,15 +12,15 @@ import (
 )
 
 func TestCandidates(t *testing.T) {
-	ssh := "git@github.com:you/kan-do-data.git"
-	https := "https://github.com/you/kan-do-data.git"
+	ssh := "git@github.com:you/kando-data.git"
+	https := "https://github.com/you/kando-data.git"
 	for url, want := range map[string][]string{
-		"you/kan-do-data":                    {ssh, https},
-		"github.com/you/kan-do-data.git":     {ssh, https},
-		"https://github.com/you/kan-do-data": {"https://github.com/you/kan-do-data"},
-		ssh:                                  {ssh},
-		"/srv/git/kan-do.git":                {"/srv/git/kan-do.git"},
-		"../kan-do.git":                      {"../kan-do.git"},
+		"you/kando-data":                    {ssh, https},
+		"github.com/you/kando-data.git":     {ssh, https},
+		"https://github.com/you/kando-data": {"https://github.com/you/kando-data"},
+		ssh:                                 {ssh},
+		"/srv/git/kan-do.git":               {"/srv/git/kan-do.git"},
+		"../kan-do.git":                     {"../kan-do.git"},
 	} {
 		if got := candidates(url); !slices.Equal(got, want) {
 			t.Errorf("%s: got %v, want %v", url, got, want)
@@ -131,7 +131,7 @@ func TestSyncBetweenTwoMachines(t *testing.T) {
 	if d, ok := errors.AsType[*Diverged](err); !ok || !d.First {
 		t.Fatalf("first sync of a second board: %v", err)
 	}
-	syncs(t, desktop, KeepRemote, "kan-do.db.bak")
+	syncs(t, desktop, KeepRemote, "kando.db.bak")
 	if got := slugs(t, desktop); !slices.Equal(got, []string{"api"}) {
 		t.Fatalf("desktop has %v", got)
 	}

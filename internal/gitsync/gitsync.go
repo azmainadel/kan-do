@@ -111,7 +111,7 @@ func SetRemote(h *home.Home, url string, prompt bool) (string, error) {
 	g := git{dir: h.Dir, prompt: prompt}
 	url = strings.TrimRight(strings.TrimSpace(url), "/")
 	if url == "" {
-		return "", errors.New("Paste the URL of a git repository, like https://github.com/you/kan-do-data")
+		return "", errors.New("Paste the URL of a git repository, like https://github.com/you/kando-data")
 	}
 	var failure, head string
 	found := ""
@@ -218,14 +218,14 @@ func Sync(h *home.Home, keep Keep, prompt bool) (string, error) {
 	}
 	if name == "" {
 		return "", errors.New("Sync isn't set up yet. Create an empty private repo, on GitHub for example, " +
-			"then press the sync button on the board and paste its URL, or run:\n  kan-do sync --repo <url>")
+			"then press the sync button on the board and paste its URL, or run:\n  kando sync --repo <url>")
 	}
 	if _, err := g.run("fetch", "--quiet", "--prune", name); err != nil {
 		return "", err
 	}
 
 	// Wait for open connections to finish and keep new ones out while the database is
-	// staged. The lock is held only while git reads or replaces kan-do.db, never across a
+	// staged. The lock is held only while git reads or replaces kando.db, never across a
 	// commit (hooks, signing prompts) or the network.
 	if err := withLock(h, func() error {
 		if err := settle(h); err != nil {
@@ -237,10 +237,10 @@ func Sync(h *home.Home, keep Keep, prompt bool) (string, error) {
 		return "", err
 	}
 	if !g.ok("diff", "--cached", "--quiet") {
-		args := []string{"commit", "--quiet", "--message", "kan-do sync from " + hostname()}
+		args := []string{"commit", "--quiet", "--message", "kando sync from " + hostname()}
 		// A machine where git doesn't know the user yet still syncs.
 		if !g.ok("config", "user.email") {
-			args = append([]string{"-c", "user.name=kan-do", "-c", "user.email=kan-do@localhost"}, args...)
+			args = append([]string{"-c", "user.name=kando", "-c", "user.email=kando@localhost"}, args...)
 		}
 		if _, err := g.run(args...); err != nil {
 			return "", err
@@ -325,15 +325,15 @@ func Sync(h *home.Home, keep Keep, prompt bool) (string, error) {
 		return "Overwrote " + upstream + " with this machine's board.", nil
 	case keep == KeepRemote:
 		if err := withLock(h, func() error {
-			if err := copyFile(h.DBPath(), h.Dir+"/kan-do.db.bak"); err != nil {
-				return fmt.Errorf("cannot back up kan-do.db: %w", err)
+			if err := copyFile(h.DBPath(), h.Dir+"/kando.db.bak"); err != nil {
+				return fmt.Errorf("cannot back up kando.db: %w", err)
 			}
 			_, err := g.run("reset", "--quiet", "--hard", "@{upstream}")
 			return err
 		}); err != nil {
 			return "", err
 		}
-		return "Took the board from " + upstream + "; this machine's old board is in kan-do.db.bak.", migrate(h)
+		return "Took the board from " + upstream + "; this machine's old board is in kando.db.bak.", migrate(h)
 	}
 	what := "This machine and " + upstream + " both changed the board since the last sync, and a database file can't be merged."
 	if first {
@@ -341,8 +341,8 @@ func Sync(h *home.Home, keep Keep, prompt bool) (string, error) {
 	}
 	return "", &Diverged{
 		Message: what + " Keep one side:\n" +
-			"  kan-do sync --keep-remote  use the board in " + upstream + " here (this machine's is kept in kan-do.db.bak)\n" +
-			"  kan-do sync --keep-local   overwrite " + upstream + " with this machine's board",
+			"  kando sync --keep-remote  use the board in " + upstream + " here (this machine's is kept in kando.db.bak)\n" +
+			"  kando sync --keep-local   overwrite " + upstream + " with this machine's board",
 		First: first,
 	}
 }
@@ -359,7 +359,7 @@ func withLock(h *home.Home, f func() error) error {
 	return f()
 }
 
-// settle makes kan-do.db complete on its own, without its journal. It opens the file
+// settle makes kando.db complete on its own, without its journal. It opens the file
 // directly: the caller holds the exclusive lock that Home.Store would wait on.
 func settle(h *home.Home) error {
 	s, err := store.Open(h.DBPath(), h.Config.Statuses, nil)

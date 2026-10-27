@@ -1,4 +1,4 @@
-// Package mcp serves the board as MCP tools: over stdio for `kan-do mcp`, and over HTTP
+// Package mcp serves the board as MCP tools: over stdio for `kando mcp`, and over HTTP
 // at /mcp of the board. Replies are short plain text to save agents' tokens.
 package mcp
 
@@ -239,7 +239,7 @@ func (b *board) server() *sdk.Server {
 	if b.cwd == "" {
 		instr = httpInstructions
 	}
-	server := sdk.NewServer(&sdk.Implementation{Name: "kan-do", Version: version.Version},
+	server := sdk.NewServer(&sdk.Implementation{Name: "kando", Version: version.Version},
 		&sdk.ServerOptions{Instructions: instr, Capabilities: &sdk.ServerCapabilities{}})
 
 	tool(server, b, "list_projects", "List all projects with their linked repo and open task counts.",

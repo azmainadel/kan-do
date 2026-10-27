@@ -18,8 +18,8 @@ describe("cleanTags", () => {
 
 describe("repoName", () => {
   it("finds owner/repo in any git URL", () => {
-    expect(repoName("git@github.com:you/kan-do-data.git")).toBe("you/kan-do-data");
-    expect(repoName("https://github.com/you/kan-do-data")).toBe("you/kan-do-data");
+    expect(repoName("git@github.com:you/kando-data.git")).toBe("you/kando-data");
+    expect(repoName("https://github.com/you/kando-data")).toBe("you/kando-data");
   });
 });
 

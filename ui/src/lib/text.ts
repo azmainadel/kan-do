@@ -31,7 +31,7 @@ export function cleanTags(text: string): string[] {
 
 export const plural = (n: number, one: string, many = one + "s") => `${n} ${n === 1 ? one : many}`;
 
-/** "you/kan-do-data" from any URL of a git repo. */
+/** "you/kando-data" from any URL of a git repo. */
 export const repoName = (url: string) =>
   url
     .replace(/\.git$/, "")

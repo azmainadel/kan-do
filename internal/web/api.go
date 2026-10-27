@@ -91,7 +91,7 @@ func pathID(r *http.Request) (int64, error) {
 func (a *api) routes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/ping", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		io.WriteString(w, "kan-do")
+		io.WriteString(w, "kando")
 	})
 	mux.HandleFunc("GET /api/board", a.handle(a.board))
 	mux.HandleFunc("GET /api/search", a.handle(func(r *http.Request, s *store.Store) (any, error) {

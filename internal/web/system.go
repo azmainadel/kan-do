@@ -47,7 +47,7 @@ func (a *api) setSyncRepo(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{"remote": remote})
 }
 
-// syncNow is `kan-do sync` without git ever prompting. When both sides changed, it
+// syncNow is `kando sync` without git ever prompting. When both sides changed, it
 // answers 409 with diverged, and the board asks which side to keep.
 func (a *api) syncNow(w http.ResponseWriter, r *http.Request) {
 	var body struct {
@@ -98,6 +98,6 @@ func (a *api) updateNow(w http.ResponseWriter, _ *http.Request) {
 		// Let the answer reach the board first.
 		time.Sleep(300 * time.Millisecond)
 		err := update.Restart(exe)
-		fmt.Fprintf(os.Stderr, "kan-do: updated, but cannot restart: %v\n", err)
+		fmt.Fprintf(os.Stderr, "kando: updated, but cannot restart: %v\n", err)
 	}()
 }

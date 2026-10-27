@@ -122,7 +122,7 @@ func Archive(v string) string {
 	if arch == "arm" {
 		arch = "armv7"
 	}
-	return fmt.Sprintf("kan-do_%s_%s_%s.tar.gz", v, runtime.GOOS, arch)
+	return fmt.Sprintf("kando_%s_%s_%s.tar.gz", v, runtime.GOOS, arch)
 }
 
 // Install puts the latest release in place of this program, and returns its path, ready
@@ -163,7 +163,7 @@ func Install() (string, error) {
 	if err := verify(archive, sums, name); err != nil {
 		return "", err
 	}
-	bin, err := extract(archive, "kan-do")
+	bin, err := extract(archive, "kando")
 	if err != nil {
 		return "", err
 	}
@@ -211,7 +211,7 @@ func extract(archive []byte, name string) ([]byte, error) {
 // replace writes the new program next to the old one, then renames it over, so the old
 // one stays whole if anything fails, and a running copy keeps its file.
 func replace(exe string, bin []byte) error {
-	tmp, err := os.CreateTemp(filepath.Dir(exe), ".kan-do-update-*")
+	tmp, err := os.CreateTemp(filepath.Dir(exe), ".kando-update-*")
 	if err != nil {
 		return fmt.Errorf("cannot write next to %s (reinstall with the command in the README): %w", exe, err)
 	}

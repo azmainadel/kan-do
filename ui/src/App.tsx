@@ -118,7 +118,7 @@ export function App() {
   const newTask = async () => {
     const projects = board.data?.projects ?? [];
     if (!projects.length) return toast("Create a project first");
-    const last = storage.get("kan-do.newTaskProject");
+    const last = storage.get("kando.newTaskProject");
     const target = project !== "all" ? project : projects.some((p) => p.slug === last) ? last! : projects[0]!.slug;
     try {
       const t = await api.createTask(target, NEW_TITLE);
@@ -193,13 +193,13 @@ export function App() {
       first
         ? {
             title: `${repo} already has a board`,
-            body: "Use it on this machine? This machine's current board is kept in kan-do.db.bak.",
+            body: "Use it on this machine? This machine's current board is kept in kando.db.bak.",
             action: "Use the board in the repo",
             alternative: "Replace it with this board",
           }
         : {
             title: "Both machines changed the board",
-            body: "This machine and another one both changed the board since the last sync, and boards can't be merged. Keep one side. The board you replace here is kept in kan-do.db.bak.",
+            body: "This machine and another one both changed the board since the last sync, and boards can't be merged. Keep one side. The board you replace here is kept in kando.db.bak.",
             action: "Keep this machine's board",
             alternative: "Take the other machine's board",
           },
@@ -253,14 +253,14 @@ export function App() {
       const status = await api.updateStatus(true);
       qc.setQueryData(["update"], status);
       if (status.available) installUpdate(status.available, status.current);
-      else if (status.latest) toast(`kan-do is up to date (${status.current})`);
+      else if (status.latest) toast(`kando is up to date (${status.current})`);
       else toast("Can't reach GitHub to check for updates");
     } catch (e) {
       fail(e);
     }
   };
 
-  const [doneCollapsed, setDoneCollapsed] = useStoredFlag("kan-do.doneCollapsed", true);
+  const [doneCollapsed, setDoneCollapsed] = useStoredFlag("kando.doneCollapsed", true);
 
   // Keys that work anywhere on the board, unless typing or in a dialog. The board itself
   // handles the arrows, Enter and c for the card the keyboard is on.

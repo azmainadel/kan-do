@@ -17,7 +17,7 @@ func TestFirstOpenCreatesFiles(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, f := range []string{"config.toml", ".gitignore", "kan-do.db"} {
+	for _, f := range []string{"config.toml", ".gitignore", "kando.db"} {
 		if _, err := os.Stat(filepath.Join(dir, f)); err != nil {
 			t.Errorf("%s: %v", f, err)
 		}

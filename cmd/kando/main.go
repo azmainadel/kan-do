@@ -28,7 +28,7 @@ func main() {
 	err := root().ExecuteContext(ctx)
 	stop()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "kan-do: %v\n", err)
+		fmt.Fprintf(os.Stderr, "kando: %v\n", err)
 		os.Exit(1)
 	}
 }
@@ -48,9 +48,9 @@ func root() *cobra.Command {
 	}
 
 	cmd := &cobra.Command{
-		Use:     "kan-do",
+		Use:     "kando",
 		Short:   "A kanban board for you and your coding agents",
-		Long:    "kan-do is a kanban board for you and your coding agents.\n\nRun `kan-do` to open the board. Agents connect with `kan-do mcp`.",
+		Long:    "kan-do is a kanban board for you and your coding agents.\n\nRun `kando` to open the board. Agents connect with `kando mcp`.",
 		Version: version.Version,
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -63,7 +63,7 @@ func root() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
-	cmd.PersistentFlags().StringVar(&homeFlag, "home", "", "data folder (default $"+home.EnvHome+", then ~/kan-do)")
+	cmd.PersistentFlags().StringVar(&homeFlag, "home", "", "data folder (default $"+home.EnvHome+", then ~/kando)")
 	cmd.Flags().Uint16Var(&port, "port", 0, "port for the board (default from config.toml)")
 	cmd.Flags().BoolVar(&noOpen, "no-open", false, "start the board without opening the browser")
 
@@ -131,7 +131,7 @@ func root() *cobra.Command {
 			return nil
 		},
 	}
-	syncCmd.Flags().StringVar(&repo, "repo", "", "sync with this git repo from now on, like https://github.com/you/kan-do-data or you/kan-do-data")
+	syncCmd.Flags().StringVar(&repo, "repo", "", "sync with this git repo from now on, like https://github.com/you/kando-data or you/kando-data")
 	syncCmd.Flags().BoolVar(&keepLocal, "keep-local", false, "when both sides changed, keep this machine's board and overwrite the remote")
 	syncCmd.Flags().BoolVar(&keepRemote, "keep-remote", false, "when both sides changed, take the remote board and drop this machine's changes")
 	syncCmd.MarkFlagsMutuallyExclusive("keep-local", "keep-remote")

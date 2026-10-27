@@ -231,7 +231,7 @@ func TestImages(t *testing.T) {
 	if string(data) != "png bytes" || res.Header.Get("Content-Type") != "image/png" || !strings.Contains(res.Header.Get("Cache-Control"), "immutable") {
 		t.Fatalf("serve image: %q %v", data, res.Header)
 	}
-	if res, _ := http.Get(b.srv.URL + "/images/..%2fkan-do.db"); res.StatusCode != 404 {
+	if res, _ := http.Get(b.srv.URL + "/images/..%2fkando.db"); res.StatusCode != 404 {
 		t.Fatalf("path traversal: %d", res.StatusCode)
 	}
 
@@ -310,7 +310,7 @@ func TestEvents(t *testing.T) {
 	}
 	first := next()
 
-	// A write from another process, like `kan-do mcp`, shows up as a new token.
+	// A write from another process, like `kando mcp`, shows up as a new token.
 	s, err := h.Store()
 	if err != nil {
 		t.Fatal(err)

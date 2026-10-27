@@ -2,7 +2,7 @@
 GOTOOLCHAIN ?= go1.26.10
 export GOTOOLCHAIN
 
-BIN := kan-do
+BIN := kando
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 LDFLAGS := -s -w -X github.com/azmainadel/kan-do/internal/version.Version=$(VERSION:v%=%)
 
@@ -18,7 +18,7 @@ ui/node_modules: ui/package-lock.json
 	@touch $@
 
 build:
-	go build -ldflags "$(LDFLAGS)" -o $(BIN) ./cmd/kan-do
+	go build -ldflags "$(LDFLAGS)" -o $(BIN) ./cmd/kando
 
 test: ui/node_modules
 	go test -race ./...
@@ -33,7 +33,7 @@ lint: ui/node_modules
 e2e: ui/node_modules
 	cd ui && npm run e2e
 
-# The UI with hot reload, against a board started with `kan-do --no-open`.
+# The UI with hot reload, against a board started with `kando --no-open`.
 dev: ui/node_modules
 	cd ui && npm run dev
 

@@ -49,7 +49,7 @@ var migrations = []string{
 }
 
 // Migrate brings the schema up to date. It writes nothing when the schema already is,
-// so starting `kan-do mcp` for every agent session costs no disk write.
+// so starting `kando mcp` for every agent session costs no disk write.
 func (s *Store) Migrate() error {
 	latest := len(migrations)
 	version, okV := metaInt(s.db, "schema_version")
@@ -68,7 +68,7 @@ func (s *Store) Migrate() error {
 			if oldest, ok := metaInt(q, "compatible"); ok && oldest <= latest {
 				return nil
 			}
-			return invalid("this board was saved by a newer version of kan-do; update this one with `kan-do update`")
+			return invalid("this board was saved by a newer version of kan-do; update this one with `kando update`")
 		}
 		for i, sql := range migrations[version:] {
 			if _, err := q.Exec(sql); err != nil {

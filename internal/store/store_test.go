@@ -14,7 +14,7 @@ var statuses = []string{"todo", "doing", "review", "done"}
 
 func open(t *testing.T) *Store {
 	t.Helper()
-	s, err := Open(filepath.Join(t.TempDir(), "kan-do.db"), statuses, nil)
+	s, err := Open(filepath.Join(t.TempDir(), "kando.db"), statuses, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,7 +121,7 @@ func TestOpensABoardFromANewerVersionWhenItCan(t *testing.T) {
 	eq(t, v, newer)
 	// A change this version can't live with: it says how to update.
 	set(newer, newer)
-	fails(t, s.Migrate(), "kan-do update")
+	fails(t, s.Migrate(), "kando update")
 }
 
 func TestProjects(t *testing.T) {
@@ -236,7 +236,7 @@ func TestImages(t *testing.T) {
 }
 
 func TestMigrationMovesReposToTheirOwnTable(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "kan-do.db")
+	path := filepath.Join(t.TempDir(), "kando.db")
 	// A board at schema version 3, from before projects could have several repos.
 	db := ok(sql.Open("sqlite", path))(t)
 	ok(db.Exec(`CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)`))(t)

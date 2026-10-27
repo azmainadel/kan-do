@@ -59,7 +59,7 @@ export function SyncDialog({ open, remote, onOpenChange, onSaved }: Props) {
             </Dialog.Description>
             <input
               className="field"
-              placeholder="https://github.com/you/kan-do-data"
+              placeholder="https://github.com/you/kando-data"
               aria-label="Repository URL"
               autoComplete="off"
               spellCheck={false}
@@ -73,7 +73,7 @@ export function SyncDialog({ open, remote, onOpenChange, onSaved }: Props) {
               {!remote && (
                 <a
                   className="mr-auto text-[13px] text-muted underline-offset-2 hover:text-text hover:underline"
-                  href="https://github.com/new?name=kan-do-data&visibility=private"
+                  href="https://github.com/new?name=kando-data&visibility=private"
                   target="_blank"
                   rel="noopener"
                 >

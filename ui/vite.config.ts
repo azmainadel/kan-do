@@ -4,7 +4,7 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
 // The Go server embeds the build from internal/web/dist/app.
-// `npm run dev` proxies the API to a board started with `kan-do --no-open`.
+// `npm run dev` proxies the API to a board started with `kando --no-open`.
 const board = process.env.KANDO_URL ?? "http://localhost:4242";
 
 // The board refuses requests from other origins; the dev server is one, so drop the header.

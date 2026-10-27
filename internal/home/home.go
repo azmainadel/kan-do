@@ -20,7 +20,7 @@ const (
 	DefaultPort = 4242
 	// EnvHome names the data folder when --home isn't given.
 	EnvHome = "KANDO_HOME"
-	dbFile  = "kan-do.db"
+	dbFile  = "kando.db"
 	// lockWait is how long an operation waits for sync before giving up with "busy".
 	lockWait = 10 * time.Second
 )
@@ -41,16 +41,16 @@ listen = "127.0.0.1"
 statuses = ["todo", "doing", "review", "done"]
 
 # Also serve MCP over HTTP at http://localhost:<port>/mcp, for agents
-# that cannot start ` + "`kan-do mcp`" + ` themselves.
+# that cannot start ` + "`kando mcp`" + ` themselves.
 mcp_http = true
 `
 
-const gitignore = `# SQLite temporary files; kan-do sync makes sure kan-do.db is complete without them.
-kan-do.db-journal
-kan-do.db-wal
-kan-do.db-shm
+const gitignore = `# SQLite temporary files; kando sync makes sure kando.db is complete without them.
+kando.db-journal
+kando.db-wal
+kando.db-shm
 # Local to this machine.
-kan-do.lock
+kando.lock
 *.bak
 # macOS metadata (AppleDouble files appear on exFAT drives).
 ._*
@@ -100,7 +100,7 @@ type Home struct {
 	Config Config
 }
 
-// Resolve picks the data folder: flag, then $KANDO_HOME, then ~/kan-do.
+// Resolve picks the data folder: flag, then $KANDO_HOME, then ~/kando.
 func Resolve(flag string) (string, error) {
 	if flag != "" {
 		return flag, nil
@@ -112,7 +112,7 @@ func Resolve(flag string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("cannot find your home folder; set %s", EnvHome)
 	}
-	return filepath.Join(h, "kan-do"), nil
+	return filepath.Join(h, "kando"), nil
 }
 
 // Open opens the data folder, creating it and its files on first use, and brings the
@@ -170,7 +170,7 @@ func (h *Home) DBPath() string { return filepath.Join(h.Dir, dbFile) }
 func (h *Home) ImagesDir() string { return filepath.Join(h.Dir, "images") }
 
 // Store opens a fresh connection. Callers keep it for one operation only, so a database
-// replaced by sync is picked up on the next one. It holds a shared lock on kan-do.lock,
+// replaced by sync is picked up on the next one. It holds a shared lock on kando.lock,
 // so sync can wait for it to finish; while sync holds the lock, this waits up to
 // lockWait and then reports busy.
 func (h *Home) Store() (*store.Store, error) {
@@ -192,7 +192,7 @@ func (h *Home) Store() (*store.Store, error) {
 		}
 		if time.Now().After(deadline) {
 			lock.Close()
-			return nil, store.BusyError("kan-do sync is updating the board; try again in a moment")
+			return nil, store.BusyError("kando sync is updating the board; try again in a moment")
 		}
 		time.Sleep(25 * time.Millisecond)
 	}
@@ -222,7 +222,7 @@ func (h *Home) LockExclusive() (*os.File, error) {
 }
 
 func (h *Home) lockFile() (*os.File, error) {
-	path := filepath.Join(h.Dir, "kan-do.lock")
+	path := filepath.Join(h.Dir, "kando.lock")
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return nil, fmt.Errorf("cannot open %s: %w", path, err)

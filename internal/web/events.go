@@ -26,7 +26,7 @@ func changeToken(h *home.Home) (string, error) {
 }
 
 // hub tells connected pages when the board changes. Agents write through their own
-// `kan-do mcp` processes, so the only way to see their changes is to watch the change
+// `kando mcp` processes, so the only way to see their changes is to watch the change
 // token. One watcher runs while at least one page is connected.
 type hub struct {
 	home     *home.Home
