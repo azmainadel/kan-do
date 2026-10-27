@@ -13,24 +13,25 @@ All work is on the branch `develop`. Nothing is merged to `main` yet, and no rel
 | 3 | React UI built into the binary | Done |
 | 4 | Filter bar and keyboard navigation | Done |
 | 5 | Git sync, self-update, `service install`, `export` | Done |
-| 6 | Releases, install script, CI, README | In progress |
+| 6 | Releases, install script, CI, README | Done, not released |
 
 ### Phase 6: what's done
 
 - `LICENSE`: AGPL-3.0.
 - `.goreleaser.yaml`: builds `kando` for linux and darwin on amd64 and arm64, plus linux armv7. Archives are named `kando_<version>_<os>_<arch>.tar.gz` next to a `checksums.txt`, which is what `internal/update` and `install.sh` expect. `install.sh` is attached to each release.
 - `install.sh`: downloads the right archive, checks its SHA-256, and installs to `~/.local/bin` (or `$KANDO_INSTALL_DIR`). `$KANDO_VERSION` picks a version and `$KANDO_DOWNLOAD_URL` points it at another server, for testing.
+- `goreleaser check` and `goreleaser release --snapshot --clean` pass. The archive names in `dist/` match `update.Archive()`, including `armv7`. GoReleaser v2.19 needs Go 1.27 to install, and on macOS it must be built without cgo: `CGO_ENABLED=0 GOTOOLCHAIN=auto go install github.com/goreleaser/goreleaser/v2@v2.19.0`.
+- `install.sh` was tested against the snapshot served from `dist/`. It installs a working `kando`, and refuses an archive with a bad checksum. This found and fixed a bug: `$arch…` broke under `set -u`, because the shell read the ellipsis as part of the name.
+- `.github/workflows/ci.yml` runs `make lint`, `make test` and `make e2e` on every push and pull request, and cross-compiles every release target with `CGO_ENABLED=0`.
+- `.github/workflows/release.yml` runs GoReleaser v2.19.0 on `v*` tags.
+- The README is rewritten for people who just want to use kan-do.
+- staticcheck is pinned to v0.8.2 in the `Makefile`.
+- `make lint`, `make test` and `make e2e` all pass after the rename to `kando`.
 
 ### Phase 6: what's left
 
-1. **Check the release config.** Run `goreleaser check`, then `goreleaser release --snapshot --clean`, and confirm the archive names in `dist/` match `update.Archive()` in `internal/update/update.go`. GoReleaser v2.19 needs Go 1.27 to install: `GOTOOLCHAIN=auto go install github.com/goreleaser/goreleaser/v2@v2.19.0`. The user stopped this step once; ask before running it.
-2. **Test `install.sh` against the snapshot.** Serve `dist/` locally, run it with `KANDO_DOWNLOAD_URL` and `KANDO_VERSION` set, and confirm it installs a working `kando`.
-3. **Add CI** in `.github/workflows/`:
-   - `ci.yml` on pushes and pull requests: `make lint`, `make test`, and `make e2e` (needs `npx playwright install --with-deps chromium`). Also cross-compile every release target with `CGO_ENABLED=0`.
-   - `release.yml` on `v*` tags: GoReleaser with Go and Node set up, and `contents: write` permission.
-4. **Rewrite the README** for people who just want to use kan-do. The user asked for it to be reader friendly and short: what it is, install, run, connect an agent (`claude mcp add kando --scope user -- kando mcp`), sync between machines, a few commands, and the `config.toml` settings. Leave out internals. Keep the banner (`docs/img/banner.webp`) at the top. Don't mention where the design came from.
-5. **Pin staticcheck** in the `Makefile` (it uses `@latest`) to `honnef.co/go/tools/cmd/staticcheck@v0.8.2`.
-6. **Rerun every check after the rename to `kando`:** `make lint`, `make test`, `make e2e`. The Go tests passed after the rename. The UI's end-to-end tests have not been rerun since.
+1. **Push and watch CI.** The workflows have not run on GitHub yet.
+2. **First release.** Settle the attribution question below, then tag `v0.1.0` and push the tag. Check that the release has the five archives, `checksums.txt` and `install.sh`, and that the `curl | sh` line in the README works.
 
 ## Rules the user set
 
