@@ -1,0 +1,8 @@
+# Build output
+/dist/
+/kan-do
+# UI build output, embedded into the binary; only the placeholder is tracked
+/internal/web/dist/*
+!/internal/web/dist/index.html
+# UI dependencies
+node_modules/
