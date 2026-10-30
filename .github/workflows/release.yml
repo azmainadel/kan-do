@@ -1,18 +1,75 @@
 name: Release
 
+# Merging a pull request into main tags the next version and releases it. The
+# PR title picks the version: "feat:" or "feat(area):" bumps the minor version,
+# a "!" before the colon or "BREAKING CHANGE" bumps the major one, and anything
+# else bumps the patch. "[skip release]" in the title merges without a release.
+# Pushing a v* tag by hand still releases that tag.
 on:
+  pull_request:
+    types: [closed]
+    branches: [main]
   push:
     tags: ["v*"]
 
 permissions:
   contents: write
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
+  tag:
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.merged &&
+      !contains(github.event.pull_request.title, '[skip release]')
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.next.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0
+      - id: next
+        name: Pick the next version
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          SHA: ${{ github.event.pull_request.merge_commit_sha }}
+        run: |
+          last=$(git tag --list 'v*' --sort=-v:refname |
+            grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+          last=${last:-v0.0.0}
+          IFS=. read -r major minor patch <<< "${last#v}"
+
+          if grep -qE '^[a-z]+(\([^)]*\))?!:|BREAKING CHANGE' <<< "$TITLE"; then
+            bump="major"; major=$((major + 1)); minor=0; patch=0
+          elif grep -qE '^feat(\([^)]*\))?:' <<< "$TITLE"; then
+            bump="minor"; minor=$((minor + 1)); patch=0
+          else
+            bump="patch"; patch=$((patch + 1))
+          fi
+
+          tag="v$major.$minor.$patch"
+          echo "$last -> $tag ($bump)"
+          git tag "$tag" "$SHA"
+          git push origin "$tag"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
   release:
+    needs: tag
+    # Runs after the tag job, or on its own for a tag pushed by hand.
+    if: >-
+      always() &&
+      (needs.tag.result == 'success' ||
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')))
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ needs.tag.outputs.tag || github.ref }}
           # GoReleaser needs the full history to write the changelog.
           fetch-depth: 0
       - uses: actions/setup-go@v7
