@@ -261,6 +261,10 @@
   .inline-edit:focus {
     background: var(--hover);
   }
+  /* Draw the ring inside the field. Outside it, the panel's scroll area clips it. */
+  .inline-edit:focus-visible {
+    outline-offset: -2px;
+  }
 }
 
 @keyframes slide-in {
