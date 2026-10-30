@@ -27,7 +27,7 @@ export const Card = memo(function Card({ task, projectDot, open, focused, onOpen
       {...listeners}
       data-id={task.id}
       onClick={() => onOpen(task.id)}
-      className={`touch-manipulation rounded-[14px] ${isDragging ? "opacity-40" : ""} ${focused ? "outline-2 -outline-offset-2 outline-amber" : ""}`}
+      className={`touch-manipulation rounded-[14px] ${isDragging ? "opacity-40" : ""} ${focused && !open ? "outline-2 -outline-offset-2 outline-sage" : ""}`}
     >
       <CardBody task={task} projectDot={projectDot} open={open} />
     </div>

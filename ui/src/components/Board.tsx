@@ -47,6 +47,7 @@ interface Props {
   /** Whether a card passes the filter bar. */
   visible: (t: Task) => boolean;
   filtering: boolean;
+  onClearFilters: () => void;
 }
 
 const columnId = (status: string) => `column:${status}`;
@@ -64,6 +65,7 @@ export function Board({
   onDragging,
   visible,
   filtering,
+  onClearFilters,
 }: Props) {
   const { statuses, tasks, projects } = board;
   const derived = useMemo(() => columnsOf(tasks.filter(visible), statuses), [tasks, statuses, visible]);
@@ -136,6 +138,12 @@ export function Board({
 
   // The card the keyboard is on: arrows move it, Enter opens it, Shift + arrows move the card.
   const [focused, setFocused] = useState<number | null>(null);
+  // A card opened another way, like a new task or search, takes the keyboard focus too.
+  const [lastOpen, setLastOpen] = useState(openTask);
+  if (openTask !== lastOpen) {
+    setLastOpen(openTask);
+    if (openTask !== null) setFocused(openTask);
+  }
   const open = (id: number) => {
     setFocused(id);
     onOpen(id);
@@ -182,6 +190,14 @@ export function Board({
       onDragEnd={end}
       onDragCancel={finish}
     >
+      {filtering && tasks.length > 0 && !Object.values(derived).some((ids) => ids.length) && (
+        <p className="mx-6 mb-3 rounded-xl bg-column px-4 py-3 text-muted max-[700px]:mx-3" role="status">
+          No cards match these filters.{" "}
+          <button className="font-medium text-text underline underline-offset-2" onClick={onClearFilters}>
+            Clear filters
+          </button>
+        </p>
+      )}
       <div
         className="grid min-h-0 flex-1 auto-cols-[minmax(260px,1fr)] grid-flow-col gap-3 overflow-x-auto px-6 pb-6 max-[700px]:auto-cols-[minmax(78vw,1fr)] max-[700px]:px-3 max-[700px]:pb-3"
         style={{

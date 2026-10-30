@@ -119,15 +119,15 @@ test("moves around and moves cards with the keyboard", async () => {
   await page.locator("header").click();
   await page.keyboard.press("ArrowDown");
   const added = card("Added by an agent");
-  await expect(added).toHaveClass(/outline-amber/);
+  await expect(added).toHaveClass(/outline-sage/);
   // Shift + arrow takes the card to the next column, and the keyboard stays on it.
   await page.keyboard.press("Shift+ArrowRight");
   await expect(column("doing").locator("[data-id]", { hasText: "Added by an agent" })).toBeVisible();
-  await expect(added).toHaveClass(/outline-amber/);
+  await expect(added).toHaveClass(/outline-sage/);
   await page.keyboard.press("Shift+ArrowUp");
   await expect(column("doing").locator("[data-id]").first()).toContainText("Added by an agent");
   await page.keyboard.press("ArrowDown");
-  await expect(card("Write the install guide")).toHaveClass(/outline-amber/);
+  await expect(card("Write the install guide")).toHaveClass(/outline-sage/);
   await page.keyboard.press("Enter");
   await expect(panel().getByLabel("Title")).toHaveValue("Write the install guide");
   await page.keyboard.press("Escape");

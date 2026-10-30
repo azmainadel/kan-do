@@ -100,7 +100,7 @@ export function TaskPanel({ id, statuses, projects, fresh, onTouched, onChanged,
     >
       <div className="flex items-center gap-2 px-4 pt-3.5 pb-1.5 pl-5">
         <button
-          className="cursor-copy font-mono text-xs text-muted hover:text-text"
+          className="min-w-0 cursor-copy truncate font-mono text-xs whitespace-nowrap text-muted hover:text-text"
           title={`Copy ${taskKey(task)}`}
           onClick={() => copyText(taskKey(task))}
         >
@@ -319,7 +319,7 @@ function Description({ task, images, onSave, onEscape, onKeyDown, onImages, onRe
       ) : (
         <InlineField
           id="task-description"
-          className="inline-edit min-h-[1.5em]"
+          className="inline-edit min-h-[120px] placeholder-shown:bg-field"
           ariaLabel="Description"
           placeholder="Add a description (Markdown)"
           value={task.description}
