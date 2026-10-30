@@ -15,7 +15,7 @@ import { useEvents } from "./hooks/useEvents";
 import { useRoute } from "./hooks/useRoute";
 import { storage, useStoredFlag } from "./hooks/useStored";
 import { applyMove } from "./lib/board";
-import { filtersQuery, isFiltering, matches, parseFilters } from "./lib/filter";
+import { NO_FILTERS, filtersQuery, isFiltering, matches, parseFilters } from "./lib/filter";
 import { repoName } from "./lib/text";
 import type { Board as BoardData, Task } from "./types";
 
@@ -362,6 +362,7 @@ export function App() {
                 onDragging={onDragging}
                 visible={visible}
                 filtering={isFiltering(filters)}
+                onClearFilters={() => setFilters(NO_FILTERS)}
               />
             </>
           ) : (
