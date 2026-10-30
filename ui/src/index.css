@@ -180,12 +180,22 @@
     text-decoration: underline;
     text-underline-offset: 2px;
   }
+  /* Wide tables scroll inside the panel instead of running past its edge. */
   .md table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
     border-collapse: collapse;
   }
   .md :is(th, td) {
     border: 1px solid var(--border);
-    padding: 3px 8px;
+    padding: 4px 10px;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .md th {
+    background: var(--code);
+    font-weight: 600;
   }
   .md hr {
     border-color: var(--border);
