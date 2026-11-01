@@ -144,3 +144,7 @@ The board has no logins. If you set `listen = "0.0.0.0"`, anyone who can reach t
 ## License
 
 [AGPL-3.0](LICENSE)
+
+---
+
+[![M8ven Score](https://m8ven.ai/badge/mcp/azmainadel-kan-do-1l4hss?v=bc62d05b5ac7a64438ec319891019d1d)](https://m8ven.ai/mcp/azmainadel-kan-do-1l4hss?s=readme)
